@@ -99,9 +99,3 @@ node <mono>/node_modules/vitest/vitest.mjs --version   # Vitest
 
 - 坑清单随 dsh 快照演化持续补充（如 0808 的 `dsh run`、凭据迁移、200ms 批量持久化）；
 - 新的坑记录后会追加（含非 Windows 平台的经验，如有）。
-
----
-
-## 仓库状态
-
-🔵 **占位已入库**：内容为本地已完成的经验档案（`skills/dsh-plugin-dev/` 全套）；随 dsh 快照演化持续补充。
