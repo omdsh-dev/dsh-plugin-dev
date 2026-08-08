@@ -80,7 +80,6 @@
 | 行为 | 本机实测 |
 |---|---|
 | junction 创建 | `ln -s` 与 `cmd mklink /J` 均失败，**PowerShell `New-Item -ItemType Junction` 可用**（坑 1b） |
-| git push | HTTPS 间歇 `Connection reset`；**SSH（`git@github.com`，id_rsa 已注册 whiteicey）可靠**；新仓库需 `git push -u origin main` |
 | 仓库可见性 | **dsh-external 默认全 private**（`gh repo create --public` 被覆盖），需显式 `gh repo edit --visibility` |
 | headless 一次性任务 | 0807 有 #376（无输出/退出码 1）；**0808 起用 `dsh run "task"`**，已修复 |
 | Web GUI | `dsh web` 监听 `127.0.0.1:3080`；插件安装后需重启 GUI 才加载新工具 |
