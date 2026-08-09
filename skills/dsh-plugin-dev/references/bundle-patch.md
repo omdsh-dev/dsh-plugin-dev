@@ -53,3 +53,23 @@ dsh run "..."                                    # 端到端可用（0808 修复
 - 插件是 `link:` 依赖时，更新 lib 无需重新 `add`（改源码 → 重构建 → 重启生效）。
 
 → 下一步：[testing.md](testing.md)
+
+## 安装边界（官方 Profile Bundle 生态方向，immediate-adjustments-bundle-profile-plan）
+
+- 插件代码归插件仓库；
+- 插件组合由 profile 管理；
+- 插件安装通过 `dsh plugin --profile <profile> add <path>`；
+- DSH 核心仓库不承载第三方源码；
+- 插件不通过替换官方入口获取能力（row id 避开 tools/session/llm/web/permission）；
+- 手动复制、源码补丁和直接改核心配置只作为旧版本兼容或调试方案，不能作为默认安装流程。
+
+README 安装章节顺序（统一模板）：
+
+1. **Profile Bundle（推荐）**：`dsh plugin --profile web add "C:/path/to/<plugin>"`（需要一次性任务再加 headless）；
+2. **验证安装**：`dsh --profile web --dump-config | grep <row-id>`；
+3. **运行验证**：`dsh run "用 <tool> 完成最小任务"`；
+4. **手动安装与旧版本兼容**：仅旧快照/调试。
+
+web 与 headless 是不同 profile：web 安装不会自动覆盖 headless；`dsh run` 默认使用 headless。
+`plugin_check` 的 `core-row-id` / `missing-profile-install-example` / `manual-install-only` /
+`core-modification-required` 四项检查会验证上述边界（`schema` action 可见完整矩阵）。

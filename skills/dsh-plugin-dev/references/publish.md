@@ -70,3 +70,25 @@ dsh-toolkit/
 5. code review 一轮（实现 → 评审 → 修复提交，如 dsh-tool-csv 的 C-01..C-04）；
 6. 提交推送（SSH + `-u`），`gh repo view ... --json visibility` 确认可见性；
 7. 新增工具后**全仓扫描旧计数**（`grep -nE '6|six|合计'`），README/description 同步（教训：sed 静默失效，见坑 12）。
+
+## 6. 发布验收清单（Profile Bundle 生态，immediate-adjustments-bundle-profile-plan §4.7）
+
+### 包结构
+
+- [ ] package.json 的 `main`/`types`/`exports` 正确且指向仓库内真实存在文件（lib/ 随仓库提交，clean checkout 可运行）
+- [ ] `dsh.bundle.patch` 存在；patch 文件进入发布内容（`files` 含 lib/src/cordis.patch.yml）
+- [ ] row id 独立且不与官方核心 row（tools/session/llm/web/permission）冲突
+- [ ] 宿主能力通过 peerDependencies 声明；无用的遗留 peer 移除
+
+### 安装
+
+- [ ] README 第一安装方式是 `dsh plugin --profile <profile> add`（web/headless 分开写明）
+- [ ] 0808+ 用 `dsh run` 做端到端验证（exit 0）
+- [ ] 重复安装可安全执行（幂等）；卸载单个子插件不影响其他插件
+
+### 发布
+
+- [ ] description 清晰；`marisa-plugin` topic 已设置
+- [ ] collection 清单（catalog.json）已更新；hub 分类正确
+- [ ] 提交作者与仓库所有者一致（whiteicey <whiteicey@users.noreply.github.com>）
+- [ ] `plugin_check` 全绿（含生态四项：core-row-id / missing-profile-install-example / manual-install-only / core-modification-required）
