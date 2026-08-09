@@ -174,3 +174,47 @@ new Worker(workerUrl)
 7. **测试要含真实多形态正向 fixtures**：只用自证模板做正向用例会自我循环（checker 全绿但误杀官方示例）；把 plugin-registry examples / collection / skill 纳入差分。
 8. **报告统计语义**：`checks.total/passed` 应是"固定检查项的执行结果"（按形态适用矩阵），不是 issue 数。
 9. **发布/写操作授权门**：gh repo create/edit、hub 写入、commit/push 默认只生成计划，执行前显式确认（见 publish.md §0）。
+
+## 坑 15：Myers 行级 diff 的内存/时间预算（dsh-tool-diff，2026-08-09）
+
+**问题**：朴素 Myers 需要保存每层 diagonal 的 V 数组快照做回溯。50K 行全部互异的对抗输入（n+m=100K，V 数组 20 万项 × 2001 层 trace ≈ 1.6GB）直接打爆内存；大量相同行错位排列时蛇步重复扫描也会超时。
+
+**解决方案（四道防线，全部 O(n) 或常数）**：
+1. **公共前后缀修剪**：先吃掉两侧相同的行（O(n+m)），只在剩余的小规模片段上跑 Myers；
+2. **hash 快速拒绝**：修剪后若两侧剩余行无公共 hash（Set 判交），D 必超预算，立即回退"全删全增"；
+3. **规模上限**：剩余 np+mp > 4000 直接回退（trace 内存 ≈ 2001×8001×4B ≈ 64MB 封顶）；
+4. **蛇步总预算**：累计蛇步 > 2000 万中断并回退。
+
+回退结果语义仍正确（操作序列合法），只是非最小——对工具输出可接受，文档明示。
+
+**配套坑**：公共后缀重新拼接必须**正序**（`before[n-suf..n-1]`）——写成倒序（`n-1-i`）会让尾部 equal 行乱序（`ttt,sss,rrr`），patch 上下文错位、校验失败。这是"反向收集再整体 reverse"类算法最经典的 off-by-reverse。
+
+## 坑 16：结构化 diff 的重复报告（markdown 块对齐）
+
+**问题**：先按"完整块文本"做 Myers 对齐、再额外做同型块 replace 检查，会把同一个变化报成 remove+add+replace 三份（12 条变更 vs 实际 4 处）。
+
+**解决方案**：对齐键用**块类型 token**（p/ul/code/table/...）而不是整块文本——同型块内容变化自然落成 equal 对，再在 equal 对上做内容比较出 replace；只有结构增删才出 remove/add。代码块另走 codeBlockChanges（语言+行数），不进 blockChanges。
+
+## 坑 17：JSON 深度防线的位置（parse 之前，非递归）
+
+**问题**：递归 diff 里做深度检查时，两个"深度相同但引用不同"的深嵌套结构会在 64 层处误报 replace（identical 输入也输出变更）。
+
+**解决方案**：`JSON.parse` **之前**用 O(n) 非递归括号扫描（状态机跳过字符串字面量与转义）计算最大嵌套深度，超限直接抛错——既防调用栈溢出又避免 parse 本身卡死；diff 递归里的深度检查只留作兜底。
+
+## 坑 18：driver 加载 lib 不是 src（改完源码要先构建）
+
+**问题**：tool-driver 直连测试通过 `@deepseek-ai/dsh-tool-diff`（package.json main → lib/index.js）加载——改了 src 不重建 lib，driver 输出全是旧行为，容易误判"修复没生效"。
+
+**解决方案**：改源码后 `tsc -p tsconfig.json` 重建再跑 driver；单测（vitest 直接 import src）不受影响，两者结果不一致时先怀疑 lib 过期。
+
+## 坑 19：toolkit 并入新子包时的计数矩阵
+
+**问题**：7→8 个工具要同步改 7 处：meta `SUBPLUGINS`、`catalog.json`、README 工具表与合计（392→486）、`build-all.sh` 的 `EXPECTED` 列表与"7 个子包"文案、`test-all.sh` 注释、`package.json` description。漏一处就出现"README 说 8 个但 build-all 只验 7 个"的不一致。
+
+**解决方案**：改完 `grep -n "7 个\|392\|EXPECTED"` 全局复查；build-all 的 EXPECTED 完整性校验 + 产物 .ts 导入扫描是最后防线。
+
+## 坑 20：toolkit meta 与单插件的 profile 冲突验证法
+
+**问题**：headless/web 已逐个挂载过同名单插件时，挂 toolkit meta 会报 `tool "time" is already registered`——没法直接 `dsh run` 验证 meta 聚合。
+
+**解决方案**：临时换装法——`dsh plugin --profile headless remove` 掉 8 个单插件 → `add` toolkit → `dsh run` 验证 diff/csv 等经 meta 可用 → 再 remove toolkit + 重新 add 8 个单插件恢复原状。driver-toolkit.mjs（cordis+ToolRegistry 真实管道，只注册 meta）是无需动 profile 的快速回归。
