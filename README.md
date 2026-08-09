@@ -7,7 +7,6 @@
 
 <p align="center">
   <img src="https://badgen.net/badge/license/MIT/blue" alt="MIT" />
-  <img src="https://badgen.net/badge/spec/Agent%20Skills/8257D0" alt="Agent Skills spec" />
 </p>
 
 ---
@@ -68,7 +67,7 @@
 
 | 变量 | 值 | 说明 |
 |---|---|---|
-| `DSH_PERMISSION_MODE` | `danger-full-access` | Windows 无沙箱后端（bwrap/Landlock/Seatbelt），仅此模式可启动；同时禁用审批提示 |
+| `DSH_PERMISSION_MODE` | `danger-full-access` | **⚠️ 高风险模式（审查 PD-04）**：Windows 无沙箱后端（bwrap/Landlock/Seatbelt），仅此模式可启动，且**禁用审批提示**——只应在可信的本地开发机临时使用；**不要**写进项目模板、CI 或共享机器，也不要复制为常规建议 |
 | `DSH_TELEMETRY_DISABLED` | `1` | 用户选择关闭遥测 |
 | `DSH_HOME` | `C:\Users\admin\.dsh` | 未显式设置时默认 `~/.dsh` |
 | `DSH_*` 特殊变量 | 一律由启动环境（wrapper/export）传入 | 放 `~/.dsh/.env` 会启动报错（坑 7） |
@@ -98,3 +97,11 @@ node <mono>/node_modules/vitest/vitest.mjs --version   # Vitest
 
 - 坑清单随 dsh 快照演化持续补充（如 0808 的 `dsh run`、凭据迁移、200ms 批量持久化）；
 - 新的坑记录后会追加（含非 Windows 平台的经验，如有）。
+
+### 构建依赖分层（审查 PD-05）
+
+| 层级 | 方式 | 适用 |
+|---|---|---|
+| 首选 | 项目自包含 `devDependencies`（typescript/vitest/@types/node）+ lockfile | 可复现构建/CI |
+| out-of-tree 开发 | `DSH_MONOREPO` 指向 current snapshot，用 monorepo 的 tsc/vitest | 本机插件开发（本档案记录的方式） |
+| 环境 fallback | `.pnpm/@types+node@*` 内部路径（**版本会变**，用 `ls .pnpm/@types+node@* \| sort -V \| tail -1` 自动发现） | 仅当前机器 |
