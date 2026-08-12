@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-dev
-description: DeepSeek Harness（DSH）插件开发的踩坑与做法记录——覆盖插件形态选择、defineTool 工具开发、构建踩坑（vendor cordis 双副本 / tsconfig 三件套 / Windows junction）、cordis.patch.yml 与 profile 挂载、测试、发布与 hub 收录。当开发新插件、复现旧做法、或遇到"ctx.tools 报错""产物导入还是 .ts""dsh plugin add 怎么用"等问题时参考。
+description: DeepSeek Harness（DSH）插件开发的踩坑与做法记录——覆盖插件形态选择、defineTool 工具开发、npm rc.1 依赖线（scoped cordis 迁移）、独立构建（devDependencies + lockfile）、cordis.patch.yml 与 profile 挂载、测试、发布与 hub 收录。当开发新插件、复现旧做法、或遇到"ctx.tools 报错""双 Cordis 身份分裂""npm pack 怎么验"等问题时参考。
 license: MIT
 metadata:
   author: whiteicey
@@ -41,7 +41,7 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
    `defineTool` 参数 schema、`output.render`、`timeoutMs`、action 分发模式。
 
 4. **构建（先看踩坑记录）** → [references/build-pitfalls.md](references/build-pitfalls.md)
-   vendor cordis 双副本（`ctx.tools` 类型失效的根因）、tsconfig 三件套、Windows junction 方案。dsh-tool-csv 的 tsconfig 是验证过的零成本起点。
+   npm 路径：`npm install`（devDependencies 自包含）→ `npm run typecheck` → `npm test` → `npm run build` → `npm pack`；peer 用 scoped rc.1（`@deepseek-ai/cordis` 等）。monorepo/vendor cordis/junction 仅"源码贡献/旧 snapshot"场景。
 
 5. **挂载与验证** → [references/bundle-patch.md](references/bundle-patch.md)
    `dsh plugin --profile web|headless add <path>` → `--dump-config | grep tool-` → `dsh run "..."` 端到端。
@@ -53,10 +53,10 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
 
 | 症状 | 根因 | 解决方案 |
 |---|---|---|
-| `Property 'tools' does not exist on type 'Context'` | cordis 解析到 `.pnpm` 副本，与 monorepo 的 `vendor/cordis` 是两个模块，类型增强不合并 | 构建时 cordis 解析到 `vendor/cordis` |
+| `Property 'tools' does not exist on type 'Context'` | 双 Cordis：unscoped `cordis` 与 `@deepseek-ai/cordis` 是两个模块，dsh-tools 类型只增强 scoped | npm rc.1：全链 scoped（import/peer 统一 `@deepseek-ai/cordis`）；monorepo 场景：cordis 解析到 `vendor/cordis` |
 | `TS5097: import path can only end with '.ts'` | tsconfig 缺 `allowImportingTsExtensions` | 补 + `rewriteRelativeImportExtensions`（产物自动 `.js`） |
 | 产物 `lib/index.js` 里还是 `./x.ts` | 同上缺 rewrite | 重新构建，验证产物 |
-| `TS2591: Cannot find name 'Buffer'` | 缺 node types | `types: ["node"]`，junction 直达 `.pnpm/@types+node@*`（Windows 用 PowerShell `New-Item -ItemType Junction`；`ln -s`/`mklink /J` 在本机均失败，见坑 1b） |
+| `TS2591: Cannot find name 'Buffer'` | 缺 node types | `types: ["node"]` + devDependencies `@types/node`（npm 路径 npm install 即得；monorepo 场景 junction 直达 `.pnpm/@types+node@*`，见坑 1b） |
 | `dsh: profile web takes no task` | web profile 无 headless-runner 行 | 一次性任务改用 `dsh run`（0808+） |
 | 会话文件"只有 header" | 误用单帧解码 API（`decompressZstdFrame`）；dsh 会话是多帧 zstd 追加写入 | 用 `scanZstdFrames` + decoder 逐帧解（真实导入路径 `@deepseek-ai/dsh-session-persistence-jsonl/src/zstd.ts`） |
 | `tsc` 报错却生成了坏产物 | `noEmitOnError` 默认 false，**报错仍 emit** | 构建失败即停（`|| exit 1`）+ 产物统一验 `.ts` 残留（坑 8） |
@@ -65,9 +65,10 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
 ## 交付前验证闭环
 
 ```sh
-node <monorepo>/node_modules/typescript/bin/tsc -p tsconfig.json      # 零错误
+npm run typecheck                                                        # 零错误（npm 路径；monorepo：node <monorepo>/node_modules/typescript/bin/tsc -p tsconfig.json）
 grep -rE "from './[^']+\.ts'" lib/ || echo "产物无 .ts 残留"            # 产物干净
-dsh --profile web --dump-config | grep <工具行 id>                      # 已挂载
-dsh run "用 <工具名> 工具做一次端到端任务"                                # 实际可用
-node <monorepo>/node_modules/vitest/vitest.mjs run tests               # 测试通过
+npm run build && npm pack                                                   # 可发布产物（tarball 检查 exports 指向存在）
+dsh --profile compat --dump-config | grep <工具行 id>                      # 已挂载（rc.1 consumer）
+npm run verify:execution                                                   # 工具真实注册与执行（rc.1 consumer）
+npm test                                                                   # 测试通过
 ```

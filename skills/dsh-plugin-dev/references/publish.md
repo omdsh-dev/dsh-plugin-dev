@@ -18,6 +18,12 @@
 - `gh repo create ... --public` 会被组织策略**覆盖**为 private（实测 csv/regex 创建后仍是 private）；
 - 必须显式确认/设置：`gh repo view dsh-external/<repo> --json visibility`；`gh repo edit ... --visibility public|private --accept-visibility-change-consequences`；
 
+## 0b. npm 发布状态（2026-08-12）
+
+- 官方 NPM_TOKEN 为**只读**令牌，`@deepseek-ai` scope 无发布权限——**不执行 `npm publish`**；
+- 当前交付形态：Git（private 仓库）+ tarball（`npm pack`）+ profile bundle 安装；
+- 插件已迁移 npm rc.1 依赖线（scoped cordis peer + devDependencies + lockfile），未来获得发布授权后按 Phase E 流程发布。
+
 ## 1. 建仓与 description
 
 - 在 `dsh-external` 组织建仓（默认 private，见上）；

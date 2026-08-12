@@ -64,7 +64,7 @@ it('executes each action and surfaces errors (PD-07)', async () => {
 
 - 真实文件**只做手动差分**（默认 `it.skipIf` 或 `opt-in` 环境变量，如 `RUN_REAL_SESSION=1`），不进常规 CI；
 - **禁止**把真实会话内容提交入库或打印到日志（只输出帧数/字节数等元数据）；
-- 正向单测用**生成的最小 frame**（官方 `compressZstdFrame`），不要依赖本机 `~/.dsh/sessions`；
+- 正向单测用**生成的最小 frame**（npm 路径：Node 内置 `node:zlib` 的 `zstdCompressSync`；monorepo 路径：官方 `compressZstdFrame`），不要依赖本机 `~/.dsh/sessions`；
 - 只读：差分前后 hash 校验文件字节不变。
 
 ## 4. 运行方式

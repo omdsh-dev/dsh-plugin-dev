@@ -49,7 +49,7 @@ dsh run "..."                                    # 端到端可用（0808 修复
 ## 卸载与重名冲突（实测补充）
 
 - 移除：`dsh plugin --profile <name> remove @deepseek-ai/<plugin>`（pnpm remove 转发）；
-- **collection meta 包与独立插件重名**：profile 已单独挂载 7 个工具时再挂 dsh-toolkit 会注册重名报错——二选一（移除独立插件或逐包挂载）；meta 包 apply 具备原子回滚（任一子插件失败逆序 dispose，不残留部分状态）；
+- **collection meta 包与独立插件重名**：profile 已单独挂载同名单插件时再挂 dsh-toolkit 会注册重名报错——二选一（移除独立插件或逐包挂载）；meta 包 apply 具备原子回滚（任一子插件失败逆序 dispose，不残留部分状态）；
 - 插件是 `link:` 依赖时，更新 lib 无需重新 `add`（改源码 → 重构建 → 重启生效）。
 
 → 下一步：[testing.md](testing.md)

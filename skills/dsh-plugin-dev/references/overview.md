@@ -10,9 +10,9 @@
 
 **默认选 bundle**：官方 profile/bundle 组合机制（0806+），`dsh plugin` 命令原生支持，hub 自动识别。
 
-## dsh-external 生态地图（截至 2026-08-09，145 仓库）
+## dsh-external 生态地图（截至 2026-08-12）
 
-- **工具类**：零依赖确定性工具——time/encoding/json/calculator/csv/regex/markdown，打包在 `dsh-toolkit` collection
+- **工具类**：零依赖确定性工具——time/encoding/json/calculator/csv/regex/markdown/diff/stat/schema，打包在 `dsh-toolkit` collection
 - **能力/工作流类**：oh-my-dsh（24+ gap 插件）、official-plugins-port（23 个官方插件移植）、dsh-deep-research、dsh-inspect
 - **Web UI 类**：dsh-ui-whale、dsh-web-terminal、dsh-better-sidebar、dsh-skills-manager、dsh-web-archive 等
 - **会话互操作类**：dsh-session-search、dsh-session-hub、dsh-session-cluster、dsh-session-repair-skill
