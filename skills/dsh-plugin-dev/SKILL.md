@@ -13,6 +13,22 @@ metadata:
 
 本档案记录 dsh-external 插件开发中实际发生过的坑与验证过能用的做法。内容按实际执行的顺序组织。
 
+
+## npm rc.1 路径（官方 npm 发布后优先）
+
+官方已发布 `@deepseek-ai/dsh@0.0.1-rc.1`（lib 生产模式）。外部插件开发与验证优先走 npm 路径：
+
+- 启动指定版本：`npx -p @deepseek-ai/dsh@0.0.1-rc.1 dsh web`（不要 `install -g` 全局安装）
+- 类型与运行时使用 scoped Cordis：源码 `import type { Context } from '@deepseek-ai/cordis'`；
+  不要保留 unscoped `cordis` import/peer（dsh-tools 类型只增强 `@deepseek-ai/cordis`，双 Cordis 会导致 ctx.tools/ctx.invariants 类型与运行时身份分裂）
+- peer 固定 rc.1 范围：`@deepseek-ai/cordis: ^4.0.1-rc.1`、`@deepseek-ai/dsh-tools: ^0.0.1-rc.1`、`@deepseek-ai/dsh-invariants: ^0.0.1-rc.1`（需要 invariant companion 的包）
+- devDependencies 自包含：typescript / vitest / @types/node + lockfile；独立 checkout 可 `npm install` → typecheck → test → build → `npm pack`
+- 安装到隔离 profile：`npm pack` → `dsh plugin --profile compat add ./<pkg>.tgz` → `dsh --profile compat --dump-config`；web/headless 分属不同 profile
+- NPM_TOKEN 为只读临时令牌：仅放环境变量或临时 userconfig，绝不写入项目 `.npmrc`/提交/日志
+- 网络慢时公共包可走国内镜像（registry.npmmirror.com），`@deepseek-ai` scope 仍需官方 registry + token
+
+monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景，不再是外部插件开发的默认方式。
+
 ## 开发流程（9 个插件沿用）
 
 1. **选形态** → [references/overview.md](references/overview.md)

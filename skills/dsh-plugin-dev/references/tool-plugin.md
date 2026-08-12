@@ -31,7 +31,11 @@ dsh-tool-xxx/
     "prepack": "npm run build",
     "test": "vitest run tests"
   },
-  "peerDependencies": { "@deepseek-ai/dsh-tools": "*", "cordis": "*" },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "^0.0.1-rc.1",
+    "@deepseek-ai/cordis": "^4.0.1-rc.1",
+    "@deepseek-ai/dsh-invariants": "^0.0.1-rc.1"
+  },
   "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },   // bundle 声明，profile 自动挂载
   "exports": {
     ".": { "types": "./lib/types/index.d.ts", "default": "./lib/index.js" },
@@ -58,7 +62,7 @@ dsh-tool-xxx/
 ## 插件入口（src/index.ts）
 
 ```ts
-import type { Context } from 'cordis'
+import type { Context } from '@deepseek-ai/cordis'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 
 export const name = '@deepseek-ai/dsh-tool-xxx'
@@ -119,7 +123,7 @@ export function apply(ctx: Context): void {
 绕过 LLM 直接打真实管道——与官方 tool-bash 测试同构的最小服务栈：
 
 ```js
-import { Context } from 'cordis'
+import { Context } from '@deepseek-ai/cordis'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRegistry from '@deepseek-ai/dsh-tools'
 const ctx = new Context()
