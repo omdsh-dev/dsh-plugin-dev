@@ -1,6 +1,10 @@
 <h1 align="center">dsh-plugin-dev</h1>
 
 <p align="center">
+  [English](README.en.md)
+</p>
+
+<p align="center">
   <strong>DeepSeek Harness 插件开发中踩过的坑与验证过的做法。</strong><br/>
   记录自 DSH 公测期间（dsh-external 组织）的插件开发实践：vendor cordis 双副本、tsconfig 三件套、Windows junction、多帧 zstd API……每个坑都有发生时的现象、确认的根因与最终修法。公测结束后相关仓库已迁移至 [omdsh-dev](https://github.com/omdsh-dev) 组织并公开。
 </p>
