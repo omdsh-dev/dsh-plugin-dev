@@ -10,7 +10,7 @@
 
 **默认选 bundle**：官方 profile/bundle 组合机制（0806+），`dsh plugin` 命令原生支持，hub 自动识别。
 
-## DSH 插件生态地图（截至 2026-08-12；公测期 dsh-external 组织，2026-08-13 起本档案的 15 个仓库已迁至个人账号 whiteicey 并公开）
+## DSH 插件生态地图（截至 2026-08-12；公测期 dsh-external 组织，2026-08-13 起本档案的 15 个仓库已迁至 omdsh-dev 组织并公开）
 
 - **工具类**：零依赖确定性工具——time/encoding/json/calculator/csv/regex/markdown/diff/stat/schema，打包在 `dsh-toolkit` collection
 - **能力/工作流类**：oh-my-dsh（24+ gap 插件）、official-plugins-port（23 个官方插件移植）、dsh-deep-research、dsh-inspect

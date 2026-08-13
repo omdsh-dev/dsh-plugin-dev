@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>DeepSeek Harness 插件开发中踩过的坑与验证过的做法。</strong><br/>
-  记录自 DSH 公测期间（dsh-external 组织）的插件开发实践：vendor cordis 双副本、tsconfig 三件套、Windows junction、多帧 zstd API……每个坑都有发生时的现象、确认的根因与最终修法。公测结束后相关仓库已迁移至个人账号 whiteicey 并公开。
+  记录自 DSH 公测期间（dsh-external 组织）的插件开发实践：vendor cordis 双副本、tsconfig 三件套、Windows junction、多帧 zstd API……每个坑都有发生时的现象、确认的根因与最终修法。公测结束后相关仓库已迁移至 [omdsh-dev](https://github.com/omdsh-dev) 组织并公开。
 </p>
 
 <p align="center">
@@ -79,7 +79,7 @@
 | 行为 | 本机实测 |
 |---|---|
 | junction 创建 | `ln -s` 与 `cmd mklink /J` 均失败，**PowerShell `New-Item -ItemType Junction` 可用**（坑 1b） |
-| 仓库可见性 | **公测期间 dsh-external 默认全 private**；2026-08-13 公测结束后，本档案涉及的 15 个仓库已迁移至个人账号 [whiteicey](https://github.com/whiteicey) 并公开 |
+| 仓库可见性 | **公测期间 dsh-external 默认全 private**；2026-08-13 公测结束后，本档案涉及的 15 个仓库已迁移至 [omdsh-dev](https://github.com/omdsh-dev) 组织并公开 |
 | headless 一次性任务 | 0807 有 #376（无输出/退出码 1）；**0808 起用 `dsh run "task"`**，已修复 |
 | Web GUI | `dsh web` 监听 `127.0.0.1:3080`；插件安装后需重启 GUI 才加载新工具 |
 

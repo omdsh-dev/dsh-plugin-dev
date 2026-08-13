@@ -11,7 +11,7 @@ metadata:
 
 一句话：**工具插件 = cordis 插件包 + `cordis.patch.yml`（bundle 形态）挂进 profile 就生效；但 bundle 不是唯一形态——registry（dsh.plugin.json）/ skill（SKILL.md）/ collection（catalog.json）各有合法协议，按需求选型（审查 PD-02）。**
 
-本档案记录 DSH 公测期（dsh-external 组织）插件开发中实际发生过的坑与验证过能用的做法。内容按实际执行的顺序组织。2026-08-13 公测结束后，相关仓库已迁移至个人账号 whiteicey 并公开。
+本档案记录 DSH 公测期（dsh-external 组织）插件开发中实际发生过的坑与验证过能用的做法。内容按实际执行的顺序组织。2026-08-13 公测结束后，相关仓库已迁移至 omdsh-dev 组织并公开。
 
 
 ## npm rc.1 路径（官方 npm 发布后优先）
@@ -60,7 +60,7 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
 | `dsh: profile web takes no task` | web profile 无 headless-runner 行 | 一次性任务改用 `dsh run`（0808+） |
 | 会话文件"只有 header" | 误用单帧解码 API（`decompressZstdFrame`）；dsh 会话是多帧 zstd 追加写入 | 用 `scanZstdFrames` + decoder 逐帧解（真实导入路径 `@deepseek-ai/dsh-session-persistence-jsonl/src/zstd.ts`） |
 | `tsc` 报错却生成了坏产物 | `noEmitOnError` 默认 false，**报错仍 emit** | 构建失败即停（`|| exit 1`）+ 产物统一验 `.ts` 残留（坑 8） |
-| 建仓后以为是 public | `gh repo create --public` 被组织策略覆盖 | 公测期：显式 `gh repo view/edit --visibility` 确认——**dsh-external 默认全 private**；公测后：仓库已迁 whiteicey 并公开，但新仓库仍默认 private、公开需显式授权 |
+| 建仓后以为是 public | `gh repo create --public` 被组织策略覆盖 | 公测期：显式 `gh repo view/edit --visibility` 确认——**dsh-external 默认全 private**；公测后：仓库已迁 omdsh-dev 组织并公开，但新仓库仍默认 private、公开需显式授权 |
 
 ## 交付前验证闭环
 
