@@ -11,22 +11,29 @@
 
 **禁止把历史任务的授权延伸到新仓库**；不确定时先问。
 
-## 0a. 可见性政策（dsh-external 铁律，实测）
+## 0a. 可见性政策（历史：公测期 dsh-external 铁律）
 
-**在内测环境中任何提交到 dsh-external 的操作默认都是 private 的**：
+**公测期间**任何提交到 dsh-external 的操作默认都是 private 的：
 
 - `gh repo create ... --public` 会被组织策略**覆盖**为 private（实测 csv/regex 创建后仍是 private）；
-- 必须显式确认/设置：`gh repo view dsh-external/<repo> --json visibility`；`gh repo edit ... --visibility public|private --accept-visibility-change-consequences`；
+- 必须显式确认/设置：`gh repo view dsh-external/<repo> --json visibility`；`gh repo edit ... --visibility public|private --accept-visibility-change-consequences`。
+
+**2026-08-13 公测结束后的现状**：
+
+- 本档案涉及的 15 个插件仓库已从 `dsh-external` 组织迁移至个人账号 `whiteicey`，全部设为 **public**（用户对具体仓库明确授权公开）；
+- 旧 `dsh-external/<repo>` 地址由 GitHub 自动重定向到 `whiteicey/<repo>`，原链接不会断；
+- 组织侧的 hub/issues 等基础设施仓库仍在 `dsh-external` 下（未迁移）；
+- **新仓库仍默认按 private 创建**（AGENTS.md 隐私规则：新建必须显式 PRIVATE，公开需用户针对具体仓库明确授权）。
 
 ## 0b. npm 发布状态（2026-08-12）
 
 - 官方 NPM_TOKEN 为**只读**令牌，`@deepseek-ai` scope 无发布权限——**不执行 `npm publish`**；
-- 当前交付形态：Git（private 仓库）+ tarball（`npm pack`）+ profile bundle 安装；
+- 当前交付形态：Git（public 仓库）+ tarball（`npm pack`）+ profile bundle 安装；
 - 插件已迁移 npm rc.1 依赖线（scoped cordis peer + devDependencies + lockfile），未来获得发布授权后按 Phase E 流程发布。
 
 ## 1. 建仓与 description
 
-- 在 `dsh-external` 组织建仓（默认 private，见上）；
+- 公测期在 `dsh-external` 组织建仓（默认 private）；公测结束后新仓库建在个人账号 `whiteicey` 下（默认 private，公开需显式授权）；
 - **description 直接影响 hub 列表文案**（hub 每 2 小时自动同步 GitHub description）。格式：
 
 ```
@@ -38,10 +45,11 @@ DSH CSV 数据工具插件：解析/查询/统计/转换 CSV 文本（RFC 4180�
 ## 2. topic 与 hub 收录
 
 ```sh
-gh repo edit dsh-external/dsh-tool-xxx --add-topic marisa-plugin   # 可选增强，见下
+gh repo edit whiteicey/dsh-tool-xxx --add-topic marisa-plugin   # 可选增强，见下
 ```
 
-- **实测现状**：组织内 9 个插件（含 plugin-check）实际**都没打 `marisa-plugin` topic**（`gh api .../topics` 全空）；hub 收录实际靠 `catalog.source.json` 登记（手动或等 2 小时自动同步）——topic 机制未在本组织验证，按"可选"描述，别写进验收门槛；
+- **2026-08-13 更新**：15 个插件仓库已迁移至 `whiteicey` 并统一打上 `dsh` + `dsh-plugin` + 各仓库特征 topic（如 calculator/math/expression-evaluator）；
+- **公测期实测**：组织内 9 个插件（含 plugin-check）实际**都没打 `marisa-plugin` topic**（`gh api .../topics` 全空）；hub 收录实际靠 `catalog.source.json` 登记（手动或等 2 小时自动同步）——topic 机制未在组织验证，按"可选"描述，别写进验收门槛；
 - 分类登记：`hub` 仓库的 `catalog.source.json` 的 `repos` 加 `{ name, category }`（plugin/collection/channel/infra/research/community）；
 - 收录验证：`hub/catalog.json` 出现仓库条目（本地提交即可，自动同步会推送）。
 
