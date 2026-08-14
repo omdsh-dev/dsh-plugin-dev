@@ -47,9 +47,8 @@
 |---|---|---|
 | OS | Windows 11 Pro（build 26200），git-bash（MSYS2 3.5.7） | 本文档的 Windows 特例均在此环境实测 |
 | Node | **v24.18.1**（`~/node24` 便携版） | dsh wrapper 优先使用；系统 node 22.15 不可用 |
-| dsh 快照 | **staging-20260808T121140Z（0808）**，`dsh --version` 0.0.1 | `~/.dsh/source/current` 是指向它的 junction；换快照 = 换 `current` |
-| TypeScript | **6.0.3**（monorepo `node_modules/typescript`） | 构建命令 `node <monorepo>/node_modules/typescript/bin/tsc -p tsconfig.json` |
-| Vitest | **4.1.8**（monorepo `node_modules/vitest`） | 测试命令 `node <monorepo>/node_modules/vitest/vitest.mjs run tests` |
+| dsh（npm） | **npm @deepseek-ai/dsh@0.1.0-rc.6（lib 生产模式）** | 通过 `npx -p @deepseek-ai/dsh@0.1.0-rc.6 dsh web` 启动（lib 生产模式；勿 `install -g` 全局安装） |
+| TypeScript / Vitest | **各仓库 devDependencies 自包含（typescript/vitest/@types/node + lockfile）** | 独立 checkout 可 `npm install` → `npm run typecheck` → `npm test` → `npm run build` → `npm pack` |
 | pnpm | **11.18.0** | `dsh plugin` 内部转发用（profile 目录内） |
 | gh CLI | **2.97.0**（2026-07-31），账号 whiteicey，scopes `gist, read:org, repo` | API 操作与仓库创建/可见性管理 |
 | @types/node | `.pnpm` 下 22.20.0 / 25.9.3 / 26.1.2 并存，**构建用 22.20.0** | junction 直达 `.pnpm/@types+node@22.20.0/node_modules/@types/node` |
@@ -59,7 +58,7 @@
 | 路径 | 内容 |
 |---|---|
 | `~/.dsh`（`$DSH_HOME`） | profiles / sessions / source / settings.yaml / web.log |
-| `~/.dsh/source/current` | → `staging-20260808T121140Z`（活跃快照 junction） |
+| `~/.dsh/source/current` | → DSH 0.1.0-rc.6（npm）—— 快照 junction 时代产物（npm 模式下不存在） |
 | `<monorepo>/vendor/cordis` | **构建期 cordis 唯一合法解析源**（坑 1） |
 | `<monorepo>/packages/core/tools` | `@deepseek-ai/dsh-tools`（defineTool/工具管道） |
 | `<monorepo>/node_modules/.pnpm/@types+node@22.20.0/...` | @types/node 真实路径（坑 3） |
@@ -76,7 +75,7 @@
 | `DSH_HOME` | `C:\Users\admin\.dsh` | 未显式设置时默认 `~/.dsh` |
 | `DSH_*` 特殊变量 | 一律由启动环境（wrapper/export）传入 | 放 `~/.dsh/.env` 会启动报错（坑 7） |
 
-启动：`~/.local/bin/dsh` wrapper（**不要直接跑 `bin/dsh`**——Windows 下 MSYS 路径转换触发 `ERR_UNSUPPORTED_ESM_URL_SCHEME`，issue #388；wrapper 用 `file://` URL 启动 tsx 规避）。
+启动：`npx -p @deepseek-ai/dsh@0.1.0-rc.6 dsh web`（npm 0.1.0-rc.6，lib 生产模式；勿 `install -g` 全局安装）。旧快照方式的 wrapper 已弃用：`~/.local/bin/dsh`（不要直接跑 `bin/dsh`——Windows 下 MSYS 路径转换触发 `ERR_UNSUPPORTED_ESM_URL_SCHEME`，issue #388；wrapper 用 `file://` URL 启动 tsx 规避）。
 
 ### 平台行为差异（与"标准做法"文档对照）
 
@@ -106,6 +105,6 @@ node <mono>/node_modules/vitest/vitest.mjs --version   # Vitest
 
 | 层级 | 方式 | 适用 |
 |---|---|---|
-| 首选 | 项目自包含 `devDependencies`（typescript/vitest/@types/node）+ lockfile | 可复现构建/CI |
-| out-of-tree 开发 | `DSH_MONOREPO` 指向 current snapshot，用 monorepo 的 tsc/vitest | 本机插件开发（本档案记录的方式） |
+| 首选（当前方式） | 各仓库 devDependencies 自包含（typescript/vitest/@types/node + lockfile），独立 checkout 可 `npm install` → `npm run typecheck` → `npm test` → `npm run build` → `npm pack` | 可复现构建/CI |
+| 旧场景（out-of-tree） | `DSH_MONOREPO` 指向 current snapshot，用 monorepo 的 tsc/vitest | 快照时代的本机插件开发（历史记录） |
 | 环境 fallback | `.pnpm/@types+node@*` 内部路径（**版本会变**，用 `ls .pnpm/@types+node@* \| sort -V \| tail -1` 自动发现） | 仅当前机器 |

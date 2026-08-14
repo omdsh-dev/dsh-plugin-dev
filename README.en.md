@@ -47,9 +47,8 @@ An **experience archive** (skill + documentation): records the plugin developmen
 |---|---|---|
 | OS | Windows 11 Pro (build 26200), git-bash (MSYS2 3.5.7) | All Windows-specific cases in this document were verified in this environment |
 | Node | **v24.18.1** (`~/node24` portable) | Used preferentially by the dsh wrapper; system node 22.15 is unusable |
-| dsh snapshot | **staging-20260808T121140Z (0808)**, `dsh --version` 0.0.1 | `~/.dsh/source/current` is a junction pointing to it; switching snapshots = switching `current` |
-| TypeScript | **6.0.3** (monorepo `node_modules/typescript`) | Build command: `node <monorepo>/node_modules/typescript/bin/tsc -p tsconfig.json` |
-| Vitest | **4.1.8** (monorepo `node_modules/vitest`) | Test command: `node <monorepo>/node_modules/vitest/vitest.mjs run tests` |
+| dsh (npm) | **npm @deepseek-ai/dsh@0.1.0-rc.6 (lib production mode)** | Started via `npx -p @deepseek-ai/dsh@0.1.0-rc.6 dsh web` (lib production mode; do not `install -g` globally) |
+| TypeScript / Vitest | **Each repo's devDependencies are self-contained (typescript/vitest/@types/node + lockfile)** | An independent checkout can run `npm install` → `npm run typecheck` → `npm test` → `npm run build` → `npm pack` |
 | pnpm | **11.18.0** | Forwarded internally by `dsh plugin` (within the profile directory) |
 | gh CLI | **2.97.0** (2026-07-31), account whiteicey, scopes `gist, read:org, repo` | API operations and repository creation/visibility management |
 | @types/node | 22.20.0 / 25.9.3 / 26.1.2 coexist under `.pnpm`, **22.20.0 used for builds** | Junction reaches directly into `.pnpm/@types+node@22.20.0/node_modules/@types/node` |
@@ -59,7 +58,7 @@ An **experience archive** (skill + documentation): records the plugin developmen
 | Path | Contents |
 |---|---|
 | `~/.dsh`（`$DSH_HOME`） | profiles / sessions / source / settings.yaml / web.log |
-| `~/.dsh/source/current` | → `staging-20260808T121140Z` (active snapshot junction) |
+| `~/.dsh/source/current` | → DSH 0.1.0-rc.6 (npm) — a leftover of the snapshot-junction era (does not exist under npm mode) |
 | `<monorepo>/vendor/cordis` | **The only legitimate cordis resolution source at build time** (pitfall 1) |
 | `<monorepo>/packages/core/tools` | `@deepseek-ai/dsh-tools` (defineTool/tool pipeline) |
 | `<monorepo>/node_modules/.pnpm/@types+node@22.20.0/...` | Real path of @types/node (pitfall 3) |
@@ -76,7 +75,7 @@ An **experience archive** (skill + documentation): records the plugin developmen
 | `DSH_HOME` | `C:\Users\admin\.dsh` | Defaults to `~/.dsh` when not explicitly set |
 | `DSH_*` special variables | Always passed in by the launch environment (wrapper/export) | Putting them in `~/.dsh/.env` causes a startup error (pitfall 7) |
 
-Startup: the `~/.local/bin/dsh` wrapper (**do not run `bin/dsh` directly** — on Windows, MSYS path conversion triggers `ERR_UNSUPPORTED_ESM_URL_SCHEME`, issue #388; the wrapper launches tsx with a `file://` URL to work around it).
+Startup: `npx -p @deepseek-ai/dsh@0.1.0-rc.6 dsh web` (npm 0.1.0-rc.6, lib production mode; do not `install -g` globally). The old snapshot-era wrapper is deprecated: `~/.local/bin/dsh` (do not run `bin/dsh` directly — on Windows, MSYS path conversion triggers `ERR_UNSUPPORTED_ESM_URL_SCHEME`, issue #388; the wrapper launches tsx with a `file://` URL to work around it).
 
 ### Platform Behavior Differences (versus the "standard practice" docs)
 
@@ -106,6 +105,6 @@ node <mono>/node_modules/vitest/vitest.mjs --version   # Vitest
 
 | Layer | Method | When applicable |
 |---|---|---|
-| Preferred | Project self-contained `devDependencies` (typescript/vitest/@types/node) + lockfile | Reproducible builds/CI |
-| Out-of-tree development | `DSH_MONOREPO` points at the current snapshot, using the monorepo's tsc/vitest | Local plugin development (the method recorded in this archive) |
+| Preferred (current) | Each repo's devDependencies are self-contained (typescript/vitest/@types/node + lockfile); an independent checkout can run `npm install` → `npm run typecheck` → `npm test` → `npm run build` → `npm pack` | Reproducible builds/CI |
+| Legacy (out-of-tree) | `DSH_MONOREPO` points at the current snapshot, using the monorepo's tsc/vitest | Snapshot-era local plugin development (historical record) |
 | Environment fallback | Internal paths under `.pnpm/@types+node@*` (**versions change**; auto-discover with `ls .pnpm/@types+node@* \| sort -V \| tail -1`) | This machine only |
