@@ -32,9 +32,9 @@ dsh-tool-xxx/
     "test": "vitest run tests"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "^0.0.1-rc.1",
-    "@deepseek-ai/cordis": "^4.0.1-rc.1",
-    "@deepseek-ai/dsh-invariants": "^0.0.1-rc.1"
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.7",
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-invariants": "^0.1.0-rc.7"
   },
   "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },   // bundle 声明，profile 自动挂载
   "exports": {
@@ -145,5 +145,27 @@ function runAction(args: Args): string {
   }
 }
 ```
+
+## rc.7 设置页插件卡片（`settings.plugin.item` keyed slot）
+
+当插件同时提供 Host 设置 namespace 与浏览器设置卡片时，三处名称必须是同一个值（例如 `plugin-foo`）：
+
+1. **客户端 keyed slot**：`settings.plugin.item` 是 keyed slot，注册时必须用 `key: SETTINGS_NS`，且 `SETTINGS_NS` 必须等于 settings namespace；不要把它写成旧式 `id` 或任意插件名。keyed slot 的 key 是分发与去重依据。
+
+   ```ts
+   const SETTINGS_NS = 'plugin-foo'
+   ctx.slots.inject('settings.plugin.item', () => ctx.slots.register({
+     name: 'settings.plugin.item',
+     key: SETTINGS_NS,
+     order: 0,
+     locale: 'settings.plugin-foo',
+   }, PluginSettingsItem))
+   ```
+
+2. **Host 同名 schema**：Host 半必须以同名 namespace 注册 schema（通常是 `ctx.settings.register(settingsNamespace(SETTINGS_NS), schema, { base, applies })`）。schema 是表单的事实来源；客户端用 `settings.describe` 收到序列化 schema 和脱敏后的 `value/base/user/secrets/revision`，不要在浏览器重写一份 Host schema。
+
+3. **Host API proxy allowlist**：Host 的 API proxy 必须把同名 namespace 加入配置客户端 allowlist，并与 schema/注册生命周期同步。未列入 allowlist 的 namespace 不会出现在 `settings.describe`，写入会得到 `settings-not-exposed`；仅注册 namespace 不等于自动对浏览器公开。所有 wire 读取都走 `redactSecrets: true`，secret 字段只能在明确的写入 payload 中发送。
+
+设置写入优先使用 `settings.update`（保留未发送的 secret）；持有脱敏视图而需要删除单个字段时使用 `settings.mutate`，不要用重建后的不完整 `user` 做 wholesale `replace`。这条 settings 卡片契约不改变旧的 Profile Bundle 安装方式或 `defineTool` 工具注册契约。
 
 → 下一步：[build-pitfalls.md](build-pitfalls.md)（先看踩坑记录再构建）
