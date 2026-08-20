@@ -29,7 +29,7 @@
 
 - 官方 NPM_TOKEN 为**只读**令牌，`@deepseek-ai` scope 无发布权限——**不执行 `npm publish`**；
 - 当前交付形态：Git（public 仓库）+ tarball（`npm pack`）+ profile bundle 安装；
-- 插件已迁移 npm rc.7 依赖线（scoped cordis peer + devDependencies + lockfile），未来获得发布授权后按 Phase E 流程发布。
+- 插件已迁移 npm rc.8 依赖线（scoped cordis peer + devDependencies + lockfile），未来获得发布授权后按 Phase E 流程发布。
 
 ## 1. 建仓与 description
 

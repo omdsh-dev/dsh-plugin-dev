@@ -31,7 +31,7 @@
 |------|------|
 | [SKILL.md](skills/dsh-plugin-dev/SKILL.md) | 开发流程 + 踩坑速查表 + 交付前验证闭环 |
 | [overview.md](skills/dsh-plugin-dev/references/overview.md) | 形态选择（bundle）+ 扫描过的生态地图 |
-| [tool-plugin.md](skills/dsh-plugin-dev/references/tool-plugin.md) | defineTool 契约、参数 schema、输出模式、rc.7 settings 卡片 keyed slot 契约 |
+| [tool-plugin.md](skills/dsh-plugin-dev/references/tool-plugin.md) | defineTool 契约、参数 schema、输出模式、rc.8 settings 卡片 keyed slot 契约 |
 | [build-pitfalls.md](skills/dsh-plugin-dev/references/build-pitfalls.md) | 踩坑全集（cordis 双副本 / tsconfig / junction / 多帧 API） |
 | [bundle-patch.md](skills/dsh-plugin-dev/references/bundle-patch.md) | profile/bundle 机制、`dsh plugin add`、`dsh run` 验证 |
 | [testing.md](skills/dsh-plugin-dev/references/testing.md) | 契约测试 / 逻辑测试 / 差分测试模式 |
@@ -47,7 +47,7 @@
 |---|---|---|
 | OS | Windows 11 Pro（build 26200），git-bash（MSYS2 3.5.7） | 本文档的 Windows 特例均在此环境实测 |
 | Node | **v24.18.1**（`~/node24` 便携版） | dsh wrapper 优先使用；系统 node 22.15 不可用 |
-| dsh（npm） | **npm @deepseek-ai/dsh@0.1.0-rc.7（lib 生产模式）** | 通过 `npx -p @deepseek-ai/dsh@0.1.0-rc.7 dsh web` 启动（lib 生产模式；勿 `install -g` 全局安装） |
+| dsh（npm） | **npm @deepseek-ai/dsh@next（当前解析为 0.1.0-rc.8，lib 生产模式）** | 通过 `npx -p @deepseek-ai/dsh@next dsh web --no-open` 启动（lib 生产模式；勿 `install -g` 全局安装） |
 | TypeScript / Vitest | **各仓库 devDependencies 自包含（typescript/vitest/@types/node + lockfile）** | 独立 checkout 可 `npm install` → `npm run typecheck` → `npm test` → `npm run build` → `npm pack` |
 | pnpm | **11.18.0** | `dsh plugin` 内部转发用（profile 目录内） |
 | gh CLI | **2.97.0**（2026-07-31），账号 whiteicey，scopes `gist, read:org, repo` | API 操作与仓库创建/可见性管理 |
@@ -58,7 +58,7 @@
 | 路径 | 内容 |
 |---|---|
 | `~/.dsh`（`$DSH_HOME`） | profiles / sessions / source / settings.yaml / web.log |
-| `~/.dsh/source/current` | → DSH 0.1.0-rc.7（npm）—— 快照 junction 时代产物（npm 模式下不存在） |
+| `~/.dsh/source/current` | → DSH 0.1.0-rc.8（npm）—— 快照 junction 时代产物（npm 模式下不存在） |
 | `<monorepo>/vendor/cordis` | **构建期 cordis 唯一合法解析源**（坑 1） |
 | `<monorepo>/packages/core/tools` | `@deepseek-ai/dsh-tools`（defineTool/工具管道） |
 | `<monorepo>/node_modules/.pnpm/@types+node@22.20.0/...` | @types/node 真实路径（坑 3） |
@@ -75,7 +75,7 @@
 | `DSH_HOME` | `C:\Users\admin\.dsh` | 未显式设置时默认 `~/.dsh` |
 | `DSH_*` 特殊变量 | 一律由启动环境（wrapper/export）传入 | 放 `~/.dsh/.env` 会启动报错（坑 7） |
 
-启动：`npx -p @deepseek-ai/dsh@0.1.0-rc.7 dsh web`（npm 0.1.0-rc.7，lib 生产模式；勿 `install -g` 全局安装）。旧快照方式的 wrapper 已弃用：`~/.local/bin/dsh`（不要直接跑 `bin/dsh`——Windows 下 MSYS 路径转换触发 `ERR_UNSUPPORTED_ESM_URL_SCHEME`，issue #388；wrapper 用 `file://` URL 启动 tsx 规避）。
+启动：`npx -p @deepseek-ai/dsh@next dsh web --no-open`（npm 0.1.0-rc.8，lib 生产模式；勿 `install -g` 全局安装）。旧快照方式的 wrapper 已弃用：`~/.local/bin/dsh`（不要直接跑 `bin/dsh`——Windows 下 MSYS 路径转换触发 `ERR_UNSUPPORTED_ESM_URL_SCHEME`，issue #388；wrapper 用 `file://` URL 启动 tsx 规避）。
 
 ### 平台行为差异（与"标准做法"文档对照）
 

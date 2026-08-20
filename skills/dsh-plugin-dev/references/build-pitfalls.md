@@ -1,9 +1,18 @@
 # 构建踩坑记录（全部实测）
 
-## 2026-08-12：npm rc.7 路径下的适用性变化
+## RC8 官方证据边界
+
+RC8 的 client graph、附件、commands、settings 和品牌规则以官方 npm `next` 包 README/类型及 `deepseek-ai/deepseek-harness` 已实现 notes 为准。当前官方 npm 元数据显示 `@deepseek-ai/dsh-client-web-react@next` 与 `@deepseek-ai/dsh-client-schema-form@next` 仍是 0.1.0-rc.7；不要将它们写成 RC8。
+
+RC8 client bundles 由 `exports["./client"]` 进入 lazy-CJS graph；动态依赖用精确 `dsh.client.external` specifier，provider 先于 consumer，跨包值导入走 `/client`。
+
+图片命令使用 `EncodedImageAttachment[]`，Host executor 负责 admission；`input.images` 未声明时必须拒绝而非丢弃。Settings wire 必须 `redactSecrets: true`，脱敏视图删除字段用 `mutate`。
+
+
+## 2026-08-12：npm rc.8 路径下的适用性变化
 
 - 坑 1 / 1b / 3 / 5（vendor cordis 双副本、junction、monorepo tsc 路径）**仅适用于 monorepo/旧 snapshot 场景**；
-  npm 路径（`@deepseek-ai/dsh@0.1.0-rc.7`）下：peer 全为 scoped（`@deepseek-ai/cordis`），`npm install` 即得唯一 Cordis 身份与 devDependencies 工具链，无需 junction；
+  npm 路径（`@deepseek-ai/dsh@0.1.0-rc.8`）下：peer 全为 scoped（`@deepseek-ai/cordis`），`npm install` 即得唯一 Cordis 身份与 devDependencies 工具链，无需 junction；
   新坑是"双 Cordis 分裂"——unscoped `cordis` import/peer 与 scoped 并存时 `ctx.tools`/`ctx.invariants` 类型与运行时身份不一致（dsh-tools 类型只增强 `@deepseek-ai/cordis`）。
 - 坑 6（zstd 真实导入路径）：npm tarball 不含 `src/`，`@deepseek-ai/dsh-session-persistence-jsonl/src/zstd.ts` 在 npm 安装下 404——deep 模式降级 `decoder-unavailable`，frame-level 扫描不受影响；测试改用 `node:zlib` zstd 生成帧，官方差分在 npm 环境条件跳过。
 
