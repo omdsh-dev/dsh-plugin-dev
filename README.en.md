@@ -31,7 +31,7 @@ An **experience archive** (skill + documentation): records the plugin developmen
 |------|------|
 | [SKILL.md](skills/dsh-plugin-dev/SKILL.md) | Development workflow + pitfall quick-reference table + pre-delivery verification loop |
 | [overview.md](skills/dsh-plugin-dev/references/overview.md) | Shape selection (bundle) + surveyed ecosystem map |
-| [tool-plugin.md](skills/dsh-plugin-dev/references/tool-plugin.md) | defineTool contract, parameter schema, output modes, and the rc.8 settings namespace/keyed-slot contract |
+| [tool-plugin.md](skills/dsh-plugin-dev/references/tool-plugin.md) | defineTool contract, parameter schema, output modes, and the rc.1 settings namespace/keyed-slot contract |
 | [build-pitfalls.md](skills/dsh-plugin-dev/references/build-pitfalls.md) | Complete pitfall collection (cordis dual copy / tsconfig / junction / multi-frame API) |
 | [bundle-patch.md](skills/dsh-plugin-dev/references/bundle-patch.md) | profile/bundle mechanism, `dsh plugin add`, `dsh run` verification |
 | [testing.md](skills/dsh-plugin-dev/references/testing.md) | Contract test / logic test / differential test patterns |
@@ -47,7 +47,7 @@ An **experience archive** (skill + documentation): records the plugin developmen
 |---|---|---|
 | OS | Windows 11 Pro (build 26200), git-bash (MSYS2 3.5.7) | All Windows-specific cases in this document were verified in this environment |
 | Node | **v24.18.1** (`~/node24` portable) | Used preferentially by the dsh wrapper; system node 22.15 is unusable |
-| dsh (npm) | **npm @deepseek-ai/dsh@next (currently resolves to 0.1.0-rc.8, lib production mode)** | Started via `npx -p @deepseek-ai/dsh@next dsh web --no-open` (lib production mode; do not `install -g` globally) |
+| dsh (npm) | **npm @deepseek-ai/dsh@next (currently resolves to 0.1.1-rc.1, lib production mode)** | Started via `npx -p @deepseek-ai/dsh@next dsh web --no-open` (lib production mode; do not `install -g` globally) |
 | TypeScript / Vitest | **Each repo's devDependencies are self-contained (typescript/vitest/@types/node + lockfile)** | An independent checkout can run `npm install` → `npm run typecheck` → `npm test` → `npm run build` → `npm pack` |
 | pnpm | **11.18.0** | Forwarded internally by `dsh plugin` (within the profile directory) |
 | gh CLI | **2.97.0** (2026-07-31), account whiteicey, scopes `gist, read:org, repo` | API operations and repository creation/visibility management |
@@ -58,7 +58,7 @@ An **experience archive** (skill + documentation): records the plugin developmen
 | Path | Contents |
 |---|---|
 | `~/.dsh`（`$DSH_HOME`） | profiles / sessions / source / settings.yaml / web.log |
-| `~/.dsh/source/current` | → DSH 0.1.0-rc.8 (npm) — a leftover of the snapshot-junction era (does not exist under npm mode) |
+| `~/.dsh/source/current` | → DSH 0.1.1-rc.1 (npm) — a leftover of the snapshot-junction era (does not exist under npm mode) |
 | `<monorepo>/vendor/cordis` | **The only legitimate cordis resolution source at build time** (pitfall 1) |
 | `<monorepo>/packages/core/tools` | `@deepseek-ai/dsh-tools` (defineTool/tool pipeline) |
 | `<monorepo>/node_modules/.pnpm/@types+node@22.20.0/...` | Real path of @types/node (pitfall 3) |
@@ -75,7 +75,7 @@ An **experience archive** (skill + documentation): records the plugin developmen
 | `DSH_HOME` | `C:\Users\admin\.dsh` | Defaults to `~/.dsh` when not explicitly set |
 | `DSH_*` special variables | Always passed in by the launch environment (wrapper/export) | Putting them in `~/.dsh/.env` causes a startup error (pitfall 7) |
 
-Startup: `npx -p @deepseek-ai/dsh@next dsh web --no-open` (npm 0.1.0-rc.8, lib production mode; do not `install -g` globally). The old snapshot-era wrapper is deprecated: `~/.local/bin/dsh` (do not run `bin/dsh` directly — on Windows, MSYS path conversion triggers `ERR_UNSUPPORTED_ESM_URL_SCHEME`, issue #388; the wrapper launches tsx with a `file://` URL to work around it).
+Startup: `npx -p @deepseek-ai/dsh@next dsh web --no-open` (npm 0.1.1-rc.1, lib production mode; do not `install -g` globally). The old snapshot-era wrapper is deprecated: `~/.local/bin/dsh` (do not run `bin/dsh` directly — on Windows, MSYS path conversion triggers `ERR_UNSUPPORTED_ESM_URL_SCHEME`, issue #388; the wrapper launches tsx with a `file://` URL to work around it).
 
 ### Platform Behavior Differences (versus the "standard practice" docs)
 

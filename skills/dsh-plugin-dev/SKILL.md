@@ -1,6 +1,6 @@
 ---
 name: dsh-plugin-dev
-description: DeepSeek Harness（DSH）插件开发的踩坑与做法记录——覆盖插件形态选择、defineTool 工具开发、npm rc.8 依赖线（scoped cordis 迁移）、settings 新契约、独立构建（devDependencies + lockfile）、cordis.patch.yml 与 profile 挂载、测试、发布与 hub 收录。当开发新插件、复现旧做法、或遇到"ctx.tools 报错""双 Cordis 身份分裂""settings 卡片不显示""npm pack 怎么验"等问题时参考。
+description: DeepSeek Harness（DSH）插件开发的踩坑与做法记录——覆盖插件形态选择、defineTool 工具开发、npm rc.1 依赖线（scoped cordis 迁移）、settings 新契约、独立构建（devDependencies + lockfile）、cordis.patch.yml 与 profile 挂载、测试、发布与 hub 收录。当开发新插件、复现旧做法、或遇到"ctx.tools 报错""双 Cordis 身份分裂""settings 卡片不显示""npm pack 怎么验"等问题时参考。
 license: MIT
 metadata:
   author: whiteicey
@@ -14,14 +14,14 @@ metadata:
 本档案记录 DSH 公测期（dsh-external 组织）插件开发中实际发生过的坑与验证过能用的做法。内容按实际执行的顺序组织。2026-08-13 公测结束后，相关仓库已迁移至 omdsh-dev 组织并公开。
 
 
-## npm rc.8 路径（官方 npm 发布后优先）
+## npm rc.1 路径（官方 npm 发布后优先）
 
-官方已发布 `@deepseek-ai/dsh@0.1.0-rc.8`（lib 生产模式）。外部插件开发与验证优先走 npm 路径：
+官方已发布 `@deepseek-ai/dsh@0.1.1-rc.1`（lib 生产模式）。外部插件开发与验证优先走 npm 路径：
 
-- 启动指定版本：`npx -p @deepseek-ai/dsh@0.1.0-rc.8 dsh web`（不要 `install -g` 全局安装）
+- 启动指定版本：`npx -p @deepseek-ai/dsh@0.1.1-rc.1 dsh web`（不要 `install -g` 全局安装）
 - 类型与运行时使用 scoped Cordis：源码 `import type { Context } from '@deepseek-ai/cordis'`；
   不要保留 unscoped `cordis` import/peer（dsh-tools 类型只增强 `@deepseek-ai/cordis`，双 Cordis 会导致 ctx.tools/ctx.invariants 类型与运行时身份分裂）
-- peer 固定 rc.8 范围：`@deepseek-ai/cordis: ^4.0.1`、`@deepseek-ai/dsh-tools: ^0.1.0-rc.8`、`@deepseek-ai/dsh-invariants: ^0.1.0-rc.8`（需要 invariant companion 的包）
+- peer 固定 rc.1 范围：`@deepseek-ai/cordis: ^4.0.1`、`@deepseek-ai/dsh-tools: ^0.1.1-rc.1`、`@deepseek-ai/dsh-invariants: ^0.1.1-rc.1`（需要 invariant companion 的包）
 - devDependencies 自包含：typescript / vitest / @types/node + lockfile；独立 checkout 可 `npm install` → typecheck → test → build → `npm pack`
 - 安装到隔离 profile：`npm pack` → `dsh plugin --profile compat add ./<pkg>.tgz` → `dsh --profile compat --dump-config`；web/headless 分属不同 profile
 - NPM_TOKEN 为只读临时令牌：仅放环境变量或临时 userconfig，绝不写入项目 `.npmrc`/提交/日志
@@ -29,9 +29,9 @@ metadata:
 
 monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景，不再是外部插件开发的默认方式。
 
-## RC8 官方迁移要点
+## RC1 官方迁移要点
 
-以下仅记录已由官方 DSH 仓库的 RC8 npm 包 README、类型声明和已实现 Agent Note 证实的契约。未有这些证据的行为不要写进插件指南。
+以下仅记录已由官方 DSH 仓库的 RC1 npm 包 README、类型声明和已实现 Agent Note 证实的契约。未有这些证据的行为不要写进插件指南。
 
 ### 多模态附件与 slash command envelope
 
@@ -41,17 +41,17 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
 
 ### Client module graph 与迁移
 
-- RC8 的 `@deepseek-ai/dsh-client-modules@next` 是 browser lazy-CJS module graph；Node 侧扫描 `exports["./client"]`，读取可选 `dsh.client.external` 精确 specifier，动态 provider 必须先于 consumer。值导入的 client 包应使用 `./client` subpath；不要用裸包名造成第二份 module instance。
-- `@deepseek-ai/dsh-client-web-react` 与 `@deepseek-ai/dsh-client-schema-form` 的 npm `next` 仍是 **0.1.0-rc.7**，没有官方 RC8 版本，不能把它们伪写成 RC8。RC8 client graph 已由 `@deepseek-ai/dsh-client-modules@next`、`@deepseek-ai/dsh-client-runtime@next` 等新包承载；迁移时以实际 npm `next` metadata 为准，删除旧 web-react/schema-form 直导，改接对应 RC8 client packages/slots/contracts。
+- RC1 的 `@deepseek-ai/dsh-client-modules@next` 是 browser lazy-CJS module graph；Node 侧扫描 `exports["./client"]`，读取可选 `dsh.client.external` 精确 specifier，动态 provider 必须先于 consumer。值导入的 client 包应使用 `./client` subpath；不要用裸包名造成第二份 module instance。
+- `@deepseek-ai/dsh-client-web-react` 与 `@deepseek-ai/dsh-client-schema-form` 的 npm `next` 仍是 **0.1.0-rc.7**，没有官方 RC1 版本，不能把它们伪写成 RC1。RC1 client graph 已由 `@deepseek-ai/dsh-client-modules@next`、`@deepseek-ai/dsh-client-runtime@next` 等新包承载；迁移时以实际 npm `next` metadata 为准，删除旧 web-react/schema-form 直导，改接对应 RC1 client packages/slots/contracts。
 
 ### Settings namespace
 
 - `@deepseek-ai/dsh-settings@next` 的 Host API 是 namespace keyed：`register(ns, schema, { base?, applies? })`、`describe({ redactSecrets: true })`、`update(ns, patch)`、`replace(ns, section)`、`mutate(ns, ops)`。wire surface 必须 redact secrets；从脱敏视图删除字段用 `mutate`，不能用不完整的 `replace`。
-- RC8 browser settings cards 用 `settings.plugin.item` keyed by the exact settings namespace; the Plugins section uses feature-owned `settings.plugins.tab`. The key pairs served Host namespace and browser card; registration alone does not expose it.
+- RC1 browser settings cards 用 `settings.plugin.item` keyed by the exact settings namespace; the Plugins section uses feature-owned `settings.plugins.tab`. The key pairs served Host namespace and browser card; registration alone does not expose it.
 
 ### CLI/UI 与品牌
 
-- 官方 RC8 web bundle 文档明确 `--no-open` 用于禁止打开默认浏览器；RC8 验证使用 `npx -p @deepseek-ai/dsh@next dsh web --no-open`。CLI 包的 `dsh` 入口是 `lib/bin.js`。
+- 官方 RC1 web bundle 文档明确 `--no-open` 用于禁止打开默认浏览器；RC1 验证使用 `npx -p @deepseek-ai/dsh@next dsh web --no-open`。CLI 包的 `dsh` 入口是 `lib/bin.js`。
 - Official `BRAND_GUIDELINES.md` allows truthful “built on DeepSeek Harness” / “compatible with DeepSeek Harness” descriptions, recommends `DSH` for ecosystem naming, and prohibits using the full “DeepSeek Harness” trademark as a project name or implying official endorsement.
 
 ## 开发流程（9 个插件沿用）
@@ -66,7 +66,7 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
    `defineTool` 参数 schema、`output.render`、`timeoutMs`、action 分发模式；若提供设置页，按该文的 `settings.plugin.item` keyed-slot、同名 Host schema 与 API proxy allowlist 契约实现。
 
 4. **构建（先看踩坑记录）** → [references/build-pitfalls.md](references/build-pitfalls.md)
-   npm 路径：`npm install`（devDependencies 自包含）→ `npm run typecheck` → `npm test` → `npm run build` → `npm pack`；peer 用 scoped rc.8（`@deepseek-ai/cordis` 等）。monorepo/vendor cordis/junction 仅"源码贡献/旧 snapshot"场景。
+   npm 路径：`npm install`（devDependencies 自包含）→ `npm run typecheck` → `npm test` → `npm run build` → `npm pack`；peer 用 scoped rc.1（`@deepseek-ai/cordis` 等）。monorepo/vendor cordis/junction 仅"源码贡献/旧 snapshot"场景。
 
 5. **挂载与验证** → [references/bundle-patch.md](references/bundle-patch.md)
    `dsh plugin --profile web|headless add <path>` → `--dump-config | grep tool-` → `dsh run "..."` 端到端。
@@ -78,7 +78,7 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
 
 | 症状 | 根因 | 解决方案 |
 |---|---|---|
-| `Property 'tools' does not exist on type 'Context'` | 双 Cordis：unscoped `cordis` 与 `@deepseek-ai/cordis` 是两个模块，dsh-tools 类型只增强 scoped | npm rc.8：全链 scoped（import/peer 统一 `@deepseek-ai/cordis`）；monorepo 场景：cordis 解析到 `vendor/cordis` |
+| `Property 'tools' does not exist on type 'Context'` | 双 Cordis：unscoped `cordis` 与 `@deepseek-ai/cordis` 是两个模块，dsh-tools 类型只增强 scoped | npm rc.1：全链 scoped（import/peer 统一 `@deepseek-ai/cordis`）；monorepo 场景：cordis 解析到 `vendor/cordis` |
 | `TS5097: import path can only end with '.ts'` | tsconfig 缺 `allowImportingTsExtensions` | 补 + `rewriteRelativeImportExtensions`（产物自动 `.js`） |
 | 产物 `lib/index.js` 里还是 `./x.ts` | 同上缺 rewrite | 重新构建，验证产物 |
 | `TS2591: Cannot find name 'Buffer'` | 缺 node types | `types: ["node"]` + devDependencies `@types/node`（npm 路径 npm install 即得；monorepo 场景 junction 直达 `.pnpm/@types+node@*`，见坑 1b） |
@@ -93,7 +93,7 @@ monorepo/vendor cordis/junction 路径保留为"源码贡献/旧 snapshot"场景
 npm run typecheck                                                        # 零错误（npm 路径；monorepo：node <monorepo>/node_modules/typescript/bin/tsc -p tsconfig.json）
 grep -rE "from './[^']+\.ts'" lib/ || echo "产物无 .ts 残留"            # 产物干净
 npm run build && npm pack                                                   # 可发布产物（tarball 检查 exports 指向存在）
-dsh --profile compat --dump-config | grep <工具行 id>                      # 已挂载（rc.8 consumer）
-npm run verify:execution                                                   # 工具真实注册与执行（rc.8 consumer）
+dsh --profile compat --dump-config | grep <工具行 id>                      # 已挂载（rc.1 consumer）
+npm run verify:execution                                                   # 工具真实注册与执行（rc.1 consumer）
 npm test                                                                   # 测试通过
 ```

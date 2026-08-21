@@ -32,9 +32,9 @@ dsh-tool-xxx/
     "test": "vitest run tests"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-tools": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-tools": "^0.1.1-rc.1",
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-invariants": "^0.1.0-rc.8"
+    "@deepseek-ai/dsh-invariants": "^0.1.1-rc.1"
   },
   "dsh": { "bundle": { "patch": "./cordis.patch.yml" } },   // bundle 声明，profile 自动挂载
   "exports": {
@@ -146,21 +146,21 @@ function runAction(args: Args): string {
 }
 ```
 
-## RC8 多模态 command envelope
+## RC1 多模态 command envelope
 
 官方 `@deepseek-ai/dsh-commands@next` 已将命令输入从 text-only 扩展为完整 envelope。命令定义必须在 `input.images` 明确声明图片能力；执行端传递 `EncodedImageAttachment[]`，Host 通过 `admitEncodedImages` 做 canonical base64、格式、数量和总字节 admission，再把冻结有序 `ImageBlock[]` 放到 invocation。图片发给未声明的命令时必须得到错误结果，不能静默丢弃；直接命令结果也不会自动进入 model history。
 
 官方 `@deepseek-ai/dsh-attachment@next` 当前图片格式为 PNG/JPEG/WebP/GIF，持久化引用只能使用 `ImageAttachmentRef`，不得把浏览器路径、object URL、provider URL 或 base64 写入 session event。
 
-## RC8 client graph 与 settings namespace
+## RC1 client graph 与 settings namespace
 
 浏览器包的值导入使用 `exports["./client"]` subpath；`@deepseek-ai/dsh-client-modules@next` 会按 lazy-CJS graph 先注册 dynamic providers 再 materialize consumers。不要用裸包名导入另一个 client bundle，以免产生第二份模块实例。
 
-`@deepseek-ai/dsh-client-web-react@next` 与 `@deepseek-ai/dsh-client-schema-form@next` 目前官方 `next` 仍解析到 0.1.0-rc.7；没有 RC8 版时不要虚构升级。新代码应按实际 RC8 包（例如 `dsh-client-modules`、`dsh-client-runtime` 与对应 `client`/slot contract）迁移，待官方提供替代包后再改依赖。
+`@deepseek-ai/dsh-client-web-react@next` 与 `@deepseek-ai/dsh-client-schema-form@next` 目前官方 `next` 仍解析到 0.1.0-rc.7；没有 RC1 版时不要虚构升级。新代码应按实际 RC1 包（例如 `dsh-client-modules`、`dsh-client-runtime` 与对应 `client`/slot contract）迁移，待官方提供替代包后再改依赖。
 
 Settings namespace 是唯一 key：Host `register(ns, schema, ...)` 与浏览器 `settings.plugin.item` 的 key 必须一致；wire 读取使用 `describe({ redactSecrets: true })`。脱敏视图上的删除用 `mutate`，不要用不完整对象 `replace`。
 
-## rc.8 设置页插件卡片（`settings.plugin.item` keyed slot）
+## rc.1 设置页插件卡片（`settings.plugin.item` keyed slot）
 
 当插件同时提供 Host 设置 namespace 与浏览器设置卡片时，三处名称必须是同一个值（例如 `plugin-foo`）：
 
